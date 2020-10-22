@@ -5,8 +5,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import config from './env';
 import { genericErrors, constants } from '../app/utils';
-// import db from '../app/database/pg-setup';÷
-// const { errorResponse, successResponse } = Helper;
+import routes from '../app/routes';
+
 const { notFoundError, serverError, successResponse } = genericErrors;
 const {
   WELCOME,
@@ -35,6 +35,8 @@ const appConfig = (app) => {
   );
   // adds middleware that parses requests with x-www-form-urlencoded data encoding
   app.use(urlencoded({ extended: true }));
+  // serves api route
+  // app.use('/', routes);route
   // adds a heartbeat route for the culture
   app.get('/', (req, res) => successResponse(res, WELCOME));
   // Serves kue UI for viewing Jobs
