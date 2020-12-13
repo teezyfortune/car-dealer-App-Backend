@@ -6,14 +6,17 @@ import helmet from 'helmet';
 import config from './env';
 import { genericErrors, constants } from '../app/utils';
 import routes from '../app/routes';
+import { serverErrorResponse, successOkResponse } from '../app/utils/error/response';
+import { redisDB } from '../app/db/setup/redis';
 
-const { notFoundError, serverError, successResponse } = genericErrors;
+const { notFoundError, successResponse } = genericErrors;
 const {
   WELCOME,
   v1,
   WEBHOOK,
   CAR_DEALER_RUNNING,
-  API_NOT_FOUND
+  API_NOT_FOUND,
+  REDIS_RUNNING
 } = constants;
 
 const appConfig = (app) => {
@@ -35,18 +38,21 @@ const appConfig = (app) => {
   );
   // adds middleware that parses requests with x-www-form-urlencoded data encoding
   app.use(urlencoded({ extended: true }));
+
   // serves api route
-  // app.use('/', routes);route
+  app.use('/api/v1', routes);
   // adds a heartbeat route for the culture
-  app.get('/', (req, res) => successResponse(res, WELCOME));
+  app.get('/', (req, res) => successOkResponse(res, WELCOME));
   // Serves kue UI for viewing Jobs
 
   // catches 404 errors and forwards them to error handlers
   app.use((req, res, next) => {
     next(notFoundError(res, API_NOT_FOUND));
   });
+
   // handles all forwarded errors
-  app.use((err, req, res, next) => serverError(req, res, err));
+  app.use((err, req, res, next) => next(serverErrorResponse(res, { message: err })));
+  redisDB.on('connect', () => logger.info(REDIS_RUNNING));
 
   // initialize the port constant
   const port = config.PORT || 8800;
