@@ -63,4 +63,4 @@ const appConfig = (app) => {
   });
 };
 
-export default appConfig; u
+export default appConfig;
