@@ -3,6 +3,7 @@ import morgan from 'morgan';
 import { json, urlencoded } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import expressFileUpload from 'express-fileupload';
 import config from './env';
 import { genericErrors, constants } from '../app/utils';
 import routes from '../app/routes';
@@ -26,6 +27,9 @@ const appConfig = (app) => {
   app.use(helmet());
   // adds middleware for cross-origin resource sharing configuration
   app.use(cors());
+
+  // Allows multipart data to be sent
+  app.use(expressFileUpload({ useTempFiles: true }));
   // adds middleware that parses requests whose content-type is application/json
   app.use(
     json({
@@ -51,7 +55,7 @@ const appConfig = (app) => {
   });
 
   // handles all forwarded errors
-  app.use((err, req, res, next) => next(serverErrorResponse(res, { message: err })));
+  app.use((err, req, res, next) => next(serverErrorResponse(res, err)));
   redisDB.on('connect', () => logger.info(REDIS_RUNNING));
 
   // initialize the port constant
