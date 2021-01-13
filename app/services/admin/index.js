@@ -1,7 +1,7 @@
-import user from '../../db/migrations/queries/user';
+import query from '../../db/migrations/queries/user';
 import db from '../../db/setup/postgres';
 
-const { findUser, updatePassword } = user;
+const { findUser, findUserById, updatePassword } = query;
 
 /**
  *  Interface for user methods
@@ -20,11 +20,9 @@ class UserServices {
   }
 
   static async updateUserPassword(items) {
-    return db.oneOrNone(updatePassword, [items]);
-  }
-
-  static async fetchUserById(userId) {
-    return db.oneOrNone(findUser, [userId]);
+    const user = db.oneOrNone(findUserById, items.id);
+    const data = { ...user, ...items };
+    return db.oneOrNone(updatePassword, [data.salt, data.hash, data.id]);
   }
 }
 

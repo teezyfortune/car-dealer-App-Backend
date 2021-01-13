@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import AuthController from '../controllers/auth';
-import AuthMiddlewareController from '../middleware/auth';
 import { adminLoginSchema, forgotPasswordSchema } from '../validations/auth';
-import validateUserInput from '../middleware/admin';
+import { ValidationMiddleware, AuthMiddleWare } from '../middleware';
 
 const { loginUser, updatePassword } = AuthController;
-const { checkIfUserEmailExist, checkIfPasswordExist } = AuthMiddlewareController;
+const { checkIfUserEmailExist, checkIfPasswordExist } = AuthMiddleWare;
+const { validateUserInput } = ValidationMiddleware;
 
 const authRoute = Router();
 
