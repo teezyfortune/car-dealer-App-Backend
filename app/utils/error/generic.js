@@ -1,17 +1,23 @@
-const notFoundError = (res, message) => res.status(404).json({ message });
-const badRequest = (res, message) => res.status(400).json({ message });
-const conflictError = (res, message) => res.status(409).json({ message });
-const unauthorizeError = (res, message) => res.status(401).json({ message });
-const serverError = (res, message) => res.status(500).json({ message });
-const successResponse = (res, message, data) => res.status(200).json({ message, data });
-const createdOkResponse = (res, message, data) => res.status(201).json({ message, data });
+import ApiError from './api.error';
+import constants from '../constants';
+
+const {
+  constants: {
+    INTERNAL_SERVER_ERROR,
+    NOT_FOUND_API,
+    AUTH_REQUIRED,
+    INVALID_PERMISSION,
+    INVALID_CREDENTIALS,
+    ACCESS_REVOKED
+  }
+} = constants;
 
 export default {
-  notFoundError,
-  badRequest,
-  conflictError,
-  unauthorizeError,
-  serverError,
-  successResponse,
-  createdOkResponse
+  serverError: new ApiError({ message: INTERNAL_SERVER_ERROR, status: 500 }),
+  notFoundApi: new ApiError({ message: NOT_FOUND_API, status: 404 }),
+  unAuthorized: new ApiError({ message: INVALID_PERMISSION, status: 403 }),
+  accessRevoked: new ApiError({ message: ACCESS_REVOKED, status: 403 }),
+  inValidLogin: new ApiError({ message: INVALID_CREDENTIALS, status: 401 }),
+  conflictError: new ApiError({ message: INVALID_CREDENTIALS, status: 409 }),
+  authRequired: new ApiError({ message: AUTH_REQUIRED, status: 401 }),
 };
