@@ -3,10 +3,12 @@ import { extname } from 'path';
 import AWS from '../../../config/aws';
 import queries from '../../db/migrations/queries/product';
 import db from '../../db';
+import { Helper } from '../../utils';
 
-const { getProductById, updateProduct, getAllProduct, getProductByName } = queries;
+const { getProductById, updateProduct, getAllProduct, getProductByName,
+  getProductCount, findProductByName } = queries;
 const { AWS_BUCKET_NAME, S3 } = AWS;
-console.log(AWS_BUCKET_NAME);
+const { fetchResourceByPage, calcPages } = Helper;
 /**
  * Interface for product methods
  *  @class ProductService
@@ -40,8 +42,19 @@ class ProductServices {
    * @memberof UserServices
    * @returns {promise} - returns an object otherwise return null
    */
-  static async fetchAllProduct() {
-    return db.manyOrNone(getAllProduct,);
+  static async fetchAllProduct(page = 1, limit = 10) {
+    const [count, products] = await fetchResourceByPage({
+      page,
+      limit,
+      getCount: getProductCount,
+      getResources: getAllProduct,
+    });
+    return {
+      total: count.total,
+      currentPage: page,
+      totalPages: calcPages(count.total, limit),
+      products
+    };
   }
 
   /**
@@ -75,6 +88,15 @@ class ProductServices {
       ACL: 'public-read'
     };
     return S3.upload(params).promise();
+  }
+
+  /**
+   * Filter product
+   * @memberof UserServices
+   * @returns {promise} - returns an object otherwise return null
+   */
+  static async searchProductByName(name) {
+    return db.manyOrNone(findProductByName, [name]);
   }
 }
 export default ProductServices;

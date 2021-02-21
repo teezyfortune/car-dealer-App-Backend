@@ -1,9 +1,12 @@
 import { ProductServices } from '../../services';
-import { genericErrors, constants, Helper } from '../../utils';
+import { constants, Helper } from '../../utils';
+import ApiError from '../../utils/error/api.error';
 
-const { serverError, conflictError, badRequest } = genericErrors;
 const { checkFileSize, checkFileType } = Helper;
-const { ERROR_VERIFY_PRODUCT_NAME, imageFileType: { ALLOWED_FILE_TYPE } } = constants;
+const { constants: { RESOURCE_ALREADY_EXIST, RESOURCE_VERIFICATION_FAIL,
+  RESOURCE_VERIFICATION_FAIL_MSG, ERROR_UPLOADING_FILE, ERROR_UPLOADING_FILE_MSG,
+  RESOURCE_EXIST_VERIFICATION_FAIL, RESOURCE_EXIST_VERIFICATION_FAIL_MSG },
+imageFileType: { ALLOWED_FILE_TYPE } } = constants;
 const { findProductByName, upload } = ProductServices;
 
 /**
@@ -26,10 +29,14 @@ class ProductMiddleWare {
   static async checkIfProductExist(req, res, next) {
     try {
       const product = await findProductByName(req.body.name);
-      return product ? conflictError(res, 'Product already exist')
-        : next();
+      return product ? Helper.errorResponse(req, res, new ApiError({ status:
+        400,
+      message: RESOURCE_ALREADY_EXIST('Product') })) : next();
     } catch (e) {
-      return serverError(res, ERROR_VERIFY_PRODUCT_NAME);
+      e.status = RESOURCE_EXIST_VERIFICATION_FAIL('PRODUCT');
+      Helper.moduleErrLogMessager(e);
+      Helper.errorResponse(req, res,
+        new ApiError({ message: RESOURCE_VERIFICATION_FAIL_MSG('Product') }));
     }
   }
 
@@ -46,9 +53,12 @@ class ProductMiddleWare {
     try {
       const fileType = checkFileType(ALLOWED_FILE_TYPE, req.files.file.mimetype);
       return fileType ? next()
-        : badRequest(res, 'Invalid file type');
+        : Helper.errorResponse(req, res, new ApiError({ status: 400,
+          message: RESOURCE_ALREADY_EXIST('Product') }));
     } catch (e) {
-      return serverError(res, 'Error Uploading Document');
+      e.status = RESOURCE_VERIFICATION_FAIL('FILE_TYPE');
+      Helper.moduleErrLogMessager(e);
+      Helper.errorResponse(req, res, new ApiError({ message: RESOURCE_EXIST_VERIFICATION_FAIL_MSG('File type') }));
     }
   }
 
@@ -66,9 +76,14 @@ class ProductMiddleWare {
       const fileSize = checkFileSize(req.files.file, 3000000);
       return fileSize
         ? next()
-        : badRequest(res, 'File size too large');
+        : Helper.errorResponse(req, res, new ApiError({ status:
+          400,
+        message: 'File size too large' }));
     } catch (e) {
-      return serverError(res, 'Internal sever error');
+      e.status = RESOURCE_VERIFICATION_FAIL(' ');
+      Helper.moduleErrLogMessager(e);
+      Helper.errorResponse(req, res, new ApiError({ message:
+        RESOURCE_EXIST_VERIFICATION_FAIL_MSG('File size') }));
     }
   }
 
@@ -86,12 +101,11 @@ class ProductMiddleWare {
       const { tempFilePath: path, name: fileName } = req.files.file;
       const data = await upload(path, fileName);
       req.body.file = data.Location;
-      console.log('Am here');
       next();
-      console.log('Am here too');
     } catch (e) {
-      console.log('errrr', e);
-     return serverError(res, 'Error uploading your file');
+      e.status = ERROR_UPLOADING_FILE;
+      Helper.moduleErrLogMessager(e);
+      Helper.errorResponse(req, res, new ApiError({ message: ERROR_UPLOADING_FILE_MSG }));
     }
   }
 }

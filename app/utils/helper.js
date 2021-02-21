@@ -3,7 +3,13 @@ import uuidV4 from 'uuid/dist/v4';
 import jwt from 'jsonwebtoken';
 import { sha256 } from 'js-sha256';
 import env from '../../config/env';
+import db from '../db';
+import constants from './constants';
+import DBError from './error/db.error';
+import genericError from './error/generic';
 
+const { serverError } = genericError;
+const { constants: { SUCCESS_RESPONSE, FAIL, SUCCESS } } = constants;
 const signOption = {
   issuer: 'cardealer',
   subject: 'Authentication Bearer',
@@ -15,7 +21,7 @@ const signOption = {
  * @class Helper
  *
  */
-class Helpers {
+class Helper {
   /**
    * @static
    * @memberof Helper
@@ -49,10 +55,10 @@ class Helpers {
    */
 
   static hashPassword(plain) {
-    const salt = Helpers.generateSalt(8);
+    const salt = Helper.generateSalt(8);
     return {
       salt,
-      hash: Helpers.generateHash(salt, plain)
+      hash: Helper.generateHash(salt, plain)
     };
   }
   /**
@@ -65,7 +71,7 @@ class Helpers {
    */
 
   static comparePassword(hash, salt, plain) {
-    const newHash = Helpers.generateHash(salt, plain);
+    const newHash = Helper.generateHash(salt, plain);
     return hash === newHash;
   }
 
@@ -92,7 +98,7 @@ class Helpers {
    *
    */
   static verifyToken(token) {
-    return jwt.sign(token, env.JWT_SECRET);
+    return jwt.sign(token, env.JWT_SECRET, signOption);
   }
 
   /**
@@ -102,6 +108,7 @@ class Helpers {
    * @param {object} authorization - The headers object
    * @memberof AuthMiddleware
    * @returns {string | null} - Returns the Token or Null
+   *
    */
   static checkAuthorizationToken(authorization) {
     let bearerToken = null;
@@ -116,12 +123,12 @@ class Helpers {
    * Adds jwt token to object.
    * @static
    * @param { Object } user - New User Instance.
-   * @memberof Helpers
+   * @memberof Helper
    * @returns {object } - A new object containing essential user properties and jwt token.
    */
   static addTokenToData(user) {
     const { id, email, created_at, is_admin } = user;
-    const token = Helpers.generateToken({ id, email, is_admin });
+    const token = Helper.generateToken({ id, email, is_admin });
     return { id, email, created_at, token, is_admin };
   }
 
@@ -129,7 +136,7 @@ class Helpers {
    * Adds jwt token to object.
    * @static
    * @param { Object } user - New User Instance.
-   * @memberof Helpers
+   * @memberof Helper
    * @returns {object } - A new object containing essential user properties and jwt token.
    */
   static generateUUID() {
@@ -141,7 +148,7 @@ class Helpers {
    * Check for filesType type
    * @static
    * @param {any} parameter - Value to check
-   * @memberof Helpers
+   * @memberof Helper
    * @returns { Boolean } -  It returns true or false.
    */
   static checkFileType(allowedFile, file) {
@@ -172,6 +179,133 @@ class Helpers {
   static async validateInput(schema, object) {
     return schema.validateAsync(object);
   }
+
+  /**
+   * Fetches a pagination collection of a resource.
+   * @static
+   * @param {Object} options - configuration options.
+   * @param {number} options.page - Current page e.g: 1 represents first
+   * 30 records by default and 2 represents the next 30 records.
+   * @param {number} options.limit - Max number of records.
+   * @param {number} options.getCount - Max number of records.
+   * @param {number} options.getResources - Max number of records.
+   * @param {Array} options.params - Extra parameters for the get resources query.
+   * @param {Array} options.countParams - Extra parameters for the get counts query.
+   * @memberof Helper
+   * @returns {Promise} - Returns a promise array of the count anf the resources
+   */
+  static async fetchResourceByPage({
+    page,
+    limit,
+    getCount,
+    getResources,
+    params = [],
+    countParams = []
+  }) {
+    const offSet = (page - 1) * limit;
+    const fetchCount = db.one(getCount, [...countParams]);
+    const fetchCountResource = db.any(getResources, [offSet, limit, ...params]);
+    return Promise.all([fetchCount, fetchCountResource]);
+  }
+
+  /**
+   * calculate number of pages
+   * @static
+   * @param { Number } total - Total number of a particular resource.
+   * @param { Number } limit - The total number of resource to be displayed per page
+   * @memberof Helper
+   * @returns { Number } - Returns the display page value.
+   */
+  static calcPages(total, limit) {
+    const displayPage = Math.floor(total / limit);
+    return total % limit ? displayPage + 1 : displayPage;
+  }
+
+  /**
+   * Generates log for api errors.
+   * @static
+   * @private
+   * @param {object} error - The API error object.
+   * @param {Request} req - Request object.
+   * @memberof Helper
+   * @returns {String} - It returns null.
+   */
+  static apiErrLogMessager(error, req) {
+    logger.error(
+      `${error.name} - ${error.status} - ${error.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`
+    );
+  }
+
+  /**
+   * Creates DB Error object and logs it with respective error message and status.
+   * @static
+   * @param { String | Object } data - The data.
+   * @memberof Helper
+   * @returns { Object } - It returns an Error Object.
+   */
+  static makeError({ error, status }) {
+    const dbError = new DBError({
+      status,
+      message: error.message
+    });
+    Helper.moduleErrLogMessager(dbError);
+    return dbError;
+  }
+
+  /**
+   * Generates a JSON response for success scenarios.
+   * @static
+   * @param {Response} res - Response object.
+   * @param {object} options - An object containing response properties.
+   * @param {object} options.data - The payload.
+   * @param {string} options.message -  HTTP Status code.
+   * @param {number} options.code -  HTTP Status code.
+   * @memberof Helper
+   * @returns {JSON} - A JSON success response.
+   */
+  static successResponse(
+    res,
+    { data, message = SUCCESS_RESPONSE, code = 200 }
+  ) {
+    return res.status(code).json({
+      status: SUCCESS,
+      message,
+      data
+    });
+  }
+
+  /**
+   * Generates a JSON response for failure scenarios.
+   * @static
+   * @param {Request} req - Request object.
+   * @param {Response} res - Response object.
+   * @param {object} error - The error object.
+   * @param {number} error.status -  HTTP Status code, default is 500.
+   * @param {string} error.message -  Error message.
+   * @param {object|array} error.errors -  A collection of  error message.
+   * @memberof Helper
+   * @returns {JSON} - A JSON failure response.
+   */
+  static errorResponse(req, res, error) {
+    const aggregateError = { ...serverError, ...error };
+    Helper.apiErrLogMessager(aggregateError, req);
+    return res.status(aggregateError.status).json({
+      status: FAIL,
+      message: aggregateError.message,
+      errors: aggregateError.errors
+    });
+  }
+
+  /**
+   * Generates log for module errors.
+   * @static
+   * @param {object} error - The module error object.
+   * @memberof Helper
+   * @returns { Null } -  It returns null.
+   */
+  static moduleErrLogMessager(error) {
+    return logger.error(`${error.status} - ${error.name} - ${error.message}`);
+  }
 }
 
-export default Helpers;
+export default Helper;
