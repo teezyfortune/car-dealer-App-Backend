@@ -1,21 +1,21 @@
 import User from '../../services/admin';
-import { genericErrors, constants, Helper } from '../../utils';
+import { Helper, genericErrors, constants } from '../../utils';
+import ApiError from '../../utils/error/api.error';
 
-const { notFoundError, serverError, badRequest, unauthorizeError } = genericErrors;
-const { INVALID_USER, ERROR_CHECKING_TOKEN, UNAUTHORIZED_TOKEN } = constants;
 const { fetchUser } = User;
 const { comparePassword, checkAuthorizationToken, verifyToken } = Helper;
-
+const { constants: { RESOURCE_EXIST_VERIFICATION_FAIL_MSG,
+  RESOURCE_EXIST_VERIFICATION_FAIL } } = constants;
 class AuthMiddleWare {
   static async checkIfUserEmailExist(req, res, next) {
     try {
       req.data = await fetchUser(req.body.email);
-      if (req.data) {
-        return next();
-      }
-      return notFoundError(res, INVALID_USER);
+      return req.data ? next() : Helper.errorResponse(req, res, genericErrors.inValidLogin);
     } catch (e) {
-      return serverError(res, e.message);
+      e.status = RESOURCE_EXIST_VERIFICATION_FAIL_MSG('ADMIN');
+      Helper.moduleErrLogMessager(e);
+      Helper.errorResponse(req, res, new ApiError({
+        message: RESOURCE_EXIST_VERIFICATION_FAIL('Admin') }));
     }
   }
 
@@ -23,12 +23,12 @@ class AuthMiddleWare {
     try {
       const isPassword = comparePassword(req.data.password, req.data.salt,
         req.body.password);
-      if (isPassword) {
-        return next();
-      }
-      return badRequest(res, INVALID_USER);
+      return isPassword ? next() : Helper.errorResponse(req, res, genericErrors.inValidLogin);
     } catch (e) {
-      return serverError(res, e.message);
+      e.status = RESOURCE_EXIST_VERIFICATION_FAIL('PASSWORD');
+      Helper.moduleErrLogMessager(e);
+      Helper.errorResponse(req, res, new ApiError({
+        message: RESOURCE_EXIST_VERIFICATION_FAIL_MSG('Password') }));
     }
   }
 
@@ -44,6 +44,7 @@ class AuthMiddleWare {
     const {
       headers: { authorization }
     } = req;
+
     const bearerToken = checkAuthorizationToken(authorization);
     return (
       bearerToken
@@ -65,15 +66,13 @@ class AuthMiddleWare {
    */
   static authenticate(req, res, next) {
     const token = AuthMiddleWare.checkToken(req);
-    if (!token) {
-      return unauthorizeError(res, UNAUTHORIZED_TOKEN);
-    }
     try {
       const decoded = verifyToken(token);
       req.data = decoded;
       next();
+      Helper.errorResponse(req, res, genericErrors.unAuthorized);
     } catch (err) {
-      serverError(res, ERROR_CHECKING_TOKEN);
+      Helper.errorResponse(req, res, genericErrors.authRequired);
     }
   }
 }

@@ -98,7 +98,7 @@ class Helper {
    *
    */
   static verifyToken(token) {
-    return jwt.sign(token, env.JWT_SECRET);
+    return jwt.sign(token, env.JWT_SECRET, signOption);
   }
 
   /**

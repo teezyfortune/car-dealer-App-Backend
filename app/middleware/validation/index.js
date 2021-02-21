@@ -1,7 +1,9 @@
-import { genericErrors, Helper } from '../../utils';
+import { genericErrors, Helper, constants } from '../../utils';
+import ApiError from '../../utils/error/api.error';
 
 const { validateInput } = Helper;
-const { badRequest, serverError } = genericErrors;
+const { badRequest, } = genericErrors;
+const { constants: { ERROR_VALIDATING_FILE } } = constants;
 
 class ValidationMiddleware {
   static validateUserInput(schema) {
@@ -10,7 +12,8 @@ class ValidationMiddleware {
         await validateInput(schema, req.body);
         next();
       } catch (e) {
-        badRequest(res, { message: e.details[0].message });
+        Helper.errorResponse(req, res, new ApiError({
+          status: 400, message: e.details[0].message }));
       }
     };
   }
@@ -19,7 +22,8 @@ class ValidationMiddleware {
     try {
       return req.files === null ? badRequest(res, 'PLease select a file to upload') : next();
     } catch (error) {
-      serverError(res, 'Internal server error');
+      Helper.errorResponse(req, res, new ApiError({
+        message: ERROR_VALIDATING_FILE }));
     }
   }
 }

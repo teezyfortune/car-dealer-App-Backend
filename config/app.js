@@ -5,20 +5,21 @@ import cors from 'cors';
 import helmet from 'helmet';
 import expressFileUpload from 'express-fileupload';
 import config from './env';
-import { genericErrors, constants } from '../app/utils';
+import { constants, genericErrors, Helper } from '../app/utils';
 import routes from '../app/routes';
-import { serverErrorResponse, successOkResponse } from '../app/utils/error/response';
 import { redisDB } from '../app/db/setup/redis';
 
-const { notFoundError, successResponse } = genericErrors;
+const { notFoundApi } = genericErrors;
+const { successResponse } = Helper;
+
 const {
-  WELCOME,
-  v1,
-  WEBHOOK,
-  CAR_DEALER_RUNNING,
-  API_NOT_FOUND,
-  REDIS_RUNNING
-} = constants;
+  constants: {
+    WELCOME,
+    WEBHOOK,
+    CAR_DEALER_RUNNING,
+    REDIS_RUNNING,
+    NOT_FOUND_API
+  } } = constants;
 
 const appConfig = (app) => {
   // integrate wiston logger with morgan
@@ -43,19 +44,19 @@ const appConfig = (app) => {
   // adds middleware that parses requests with x-www-form-urlencoded data encoding
   app.use(urlencoded({ extended: true }));
 
+  // adds a heartbeat route for the culture
+  app.get('/', (req, res) => successResponse(res, { message: WELCOME }));
+
   // serves api route
   app.use('/api/v1', routes);
-  // adds a heartbeat route for the culture
-  app.get('/', (req, res) => successOkResponse(res, WELCOME));
-  // Serves kue UI for viewing Jobs
 
   // catches 404 errors and forwards them to error handlers
   app.use((req, res, next) => {
-    next(notFoundError(res, API_NOT_FOUND));
+    next(notFoundApi);
   });
 
   // handles all forwarded errors
-  app.use((err, req, res, next) => next(serverErrorResponse(res, err)));
+  app.use((err, req, res, next) => Helper.errorResponse(req, res, err));
   redisDB.on('connect', () => logger.info(REDIS_RUNNING));
 
   // initialize the port constant
