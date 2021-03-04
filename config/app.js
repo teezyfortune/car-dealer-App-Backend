@@ -18,7 +18,6 @@ const {
     WEBHOOK,
     CAR_DEALER_RUNNING,
     REDIS_RUNNING,
-    NOT_FOUND_API
   } } = constants;
 
 const appConfig = (app) => {

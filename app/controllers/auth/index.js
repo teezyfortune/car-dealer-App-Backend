@@ -10,7 +10,7 @@ const { hashPassword } = Helper;
 
 const { addTokenToData, successResponse } = Helper;
 const { constants: { LOGIN_SUCCESS, PASSWORD_UPDATE,
-  RESOURCE_EXIST_VERIFICATION_FAIL,
+  RESOURCE_EXIST_VERIFICATION_FAIL, RESOURCE_EXIST_VERIFICATION_FAIL_MSG,
   RESOURCE_UPDATE_FAIL, RESOURCE_UPDATE_FAIL_STATUS } } = constants;
 
 /**
@@ -38,7 +38,7 @@ class AuthController {
       });
       Helper.moduleErrLogMessager(dbError);
       next(new ApiError({ message:
-         RESOURCE_EXIST_VERIFICATION_FAIL('Admin') }));
+         RESOURCE_EXIST_VERIFICATION_FAIL_MSG('Admin') }));
     }
   }
 

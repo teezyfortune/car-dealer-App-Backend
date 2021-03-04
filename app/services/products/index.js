@@ -1,12 +1,12 @@
 import fs from 'fs';
 import { extname } from 'path';
 import AWS from '../../../config/aws';
-import queries from '../../db/migrations/queries/product';
+import queries from '../../db/queries/product';
 import db from '../../db';
 import { Helper } from '../../utils';
 
 const { getProductById, updateProduct, getAllProduct, getProductByName,
-  getProductCount, findProductByName } = queries;
+  getProductCount, findProductByName, deleteProduct } = queries;
 const { AWS_BUCKET_NAME, S3 } = AWS;
 const { fetchResourceByPage, calcPages } = Helper;
 /**
@@ -31,9 +31,20 @@ class ProductServices {
    * @returns {promise} - returns an object otherwise return null
    */
   static async updateProductInfo(items) {
-    const user = db.oneOrNone(getProductById, items.id);
+    const user = await db.oneOrNone(getProductById, items.id);
     const data = { ...user, ...items };
-    return db.oneOrNone(updateProduct, [data.product_type, data.product_name, data.image_url]);
+    return db.oneOrNone(updateProduct, [data.vehicle_type, data.product_name, data.image_url,
+      data.vehicle_history, data.manufactured_date, data.id]);
+  }
+
+  /**
+   * Delete product
+   * @param {String} - product Id
+   * @memberof UserServices
+   * @returns {promise} - returns an object otherwise return null
+   */
+  static async deleteProductInfo(productId) {
+    return db.oneOrNone(deleteProduct, [productId]);
   }
 
   /**

@@ -71,10 +71,9 @@ const initLogger = (env) => {
       winston.format.timestamp(),
       winston.format.colorize(),
       winston.format.printf(
-        (msg) =>
-          `[${new Date(msg.timestamp).toUTCString()}] - ${msg.level}: ${
-            msg.message
-          }`
+        (msg) => `[${new Date(msg.timestamp).toUTCString()}] - ${msg.level}: ${
+          msg.message
+        }`
       )
     ),
     transports: [

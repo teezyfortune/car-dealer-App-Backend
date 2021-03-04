@@ -12,13 +12,11 @@ const {
   TSR_AWS_BUCKET: AWS_BUCKET_NAME,
 
 } = process.env;
-
 const presentEnv = {
   development,
   production,
   test
 }[NODE_ENV || 'development'];
-
 export default {
   ...process.env,
   ...presentEnv,

@@ -56,7 +56,6 @@ const editNumberCheck = (param, joiObject) => joiObject.number().messages({
   'string.empty': `${param} cannot be an empty field`
 });
 
-
 const list = (fields, param, joiObject) => joiObject
   .string()
   .required()

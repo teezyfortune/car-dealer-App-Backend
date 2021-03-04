@@ -1,4 +1,4 @@
-import query from '../../db/migrations/queries/user';
+import query from '../../db/queries/user';
 import db from '../../db/setup/postgres';
 
 const { findUser, findUserById, updatePassword } = query;
