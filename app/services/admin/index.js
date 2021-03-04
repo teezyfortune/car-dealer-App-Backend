@@ -25,5 +25,4 @@ class UserServices {
     return db.oneOrNone(updatePassword, [data.salt, data.hash, data.id]);
   }
 }
-
 export default UserServices;

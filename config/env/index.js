@@ -28,3 +28,5 @@ export default {
   AWS_SECRET_KEY,
   AWS_BUCKET_NAME
 };
+
+console.log('>>>', test);
