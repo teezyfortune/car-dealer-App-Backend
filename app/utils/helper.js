@@ -13,7 +13,7 @@ const { constants: { SUCCESS_RESPONSE, FAIL, SUCCESS } } = constants;
 const signOption = {
   issuer: 'cardealer',
   subject: 'Authentication Bearer',
-  expiresIn: '2hrs'
+  expiresIn: '2h'
 };
 
 /**
@@ -98,7 +98,7 @@ class Helper {
    *
    */
   static verifyToken(token) {
-    return jwt.sign(token, env.JWT_SECRET, signOption);
+    return jwt.verify(token, env.JWT_SECRET);
   }
 
   /**
@@ -109,7 +109,9 @@ class Helper {
    * @memberof AuthMiddleware
    * @returns {string | null} - Returns the Token or Null
    *
+   *
    */
+
   static checkAuthorizationToken(authorization) {
     let bearerToken = null;
     if (authorization) {
@@ -240,7 +242,7 @@ class Helper {
    * Creates DB Error object and logs it with respective error message and status.
    * @static
    * @param { String | Object } data - The data.
-   * @memberof Helper
+   * @memberof HelperLufasi Nature Park, Lagos
    * @returns { Object } - It returns an Error Object.
    */
   static makeError({ error, status }) {

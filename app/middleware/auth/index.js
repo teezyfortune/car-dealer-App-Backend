@@ -66,11 +66,13 @@ class AuthMiddleWare {
    */
   static authenticate(req, res, next) {
     const token = AuthMiddleWare.checkToken(req);
+    if (!token) {
+      return Helper.errorResponse(req, res, genericErrors.unAuthorized);
+    }
     try {
       const decoded = verifyToken(token);
       req.data = decoded;
       next();
-      Helper.errorResponse(req, res, genericErrors.unAuthorized);
     } catch (err) {
       Helper.errorResponse(req, res, genericErrors.authRequired);
     }

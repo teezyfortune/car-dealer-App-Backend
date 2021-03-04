@@ -1,4 +1,4 @@
-import queries from '../db/migrations/queries/product';
+import queries from '../db/queries/product';
 import db from '../db';
 import { Helper } from '../utils';
 

@@ -10,20 +10,38 @@ on:
     branches: [ develop ]
 
 jobs:
-  build:
-
+  coverage:
+    name: coverage
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [10.x, 12.x, 14.x]
-
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: 123456
+          POSTGRES_DB: car_dealer_db_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 54321:5432
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+    - uses: actions/checkout@master
+    - uses: actions/setup-node@master
       with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+        node-version: '10'
+    - name: Start Redis
+      uses: supercharge/redis-github-action@1.1.0
+      with:
+        redis-version: '4.0.9'
+    - run: npm install
+    - run: npm install nyc -g
+      env:
+        CC_TEST_REPORTER_ID: '21cd1204d403962ea55408784f329eb5d7c03b2993964f0ce8aaeb99d5711031'
+        TEST_DATABASE_URL: 'postgres://fortune:123456@localhost:5432/car_dealer_db_test'
+        CAR_DEALER_JWT_SECRET: '@hdhd%w&91jqQ32nps'
+        CAR_DEALER_NODE_ENV: 'test'
+      with:
+        coverageCommand: npm run test
+        debug: true

@@ -4,18 +4,21 @@
   "description": "This Application allows car dealers to upload their car products for buyers to see and pick their choice of car",
   "main": "app.js",
   "scripts": {
-    "test": "CAR_DEALER_NODE_ENV=test node -r esm .",
+    "test": "nyc --reporter=lcov --reporter=text cross-env CAR_DEALER_NODE_ENV=test mocha -c -r esm **/test/**/*.test.js --timeout 12000 --exit",
+    "pretest": "cross-env  CAR_DEALER_NODE_ENV=test npm run migrate:reset && cross-env CAR_DEALER_NODE_ENV=test npm run migrate up && cross-env CAR_DEALER_NODE_ENV=test npm run seed:reset && cross-env CAR_DEALER_NODE_ENV=test npm run seed:up && npm run lint",
+    "prestart": "cross-env CAR_DEALER_NODE_ENV=production npm run migrate:up && cross-env CAR_DEALER_NODE_ENV=production npm run seed:up",
+    "start":"cross-env CAR_DEALER_NODE_ENV=production node -r esm .",
     "dev": "nodemon -r esm . ",
-    "start": "node -r esm . ",
     "migrate": "db-migrate --migrations-dir ./app/db/migrations",
     "migrate:up": "npm run migrate up",
     "migrate:down": "npm run migrate down",
-    "migrate:reset": "npm run migrate reset",
     "migrate:create": "npm run migrate create",
+    "migrate:reset": "npm run migrate reset",
     "seed:create": "npm run migrate create:seeds",
     "seed:up": "npm run migrate up:seeds",
     "seed:down": "npm run migrate down:seeds",
-    "seed:reset": "npm run migrate reset:seeds"
+    "seed:reset": "npm run migrate reset:seeds",
+    "lint": "eslint --ext .js ./"
   },
   "repository": {
     "type": "git",
@@ -32,20 +35,21 @@
     "aws-sdk": "^2.795.0",
     "bcrypt": "^5.0.0",
     "bluebird": "^3.7.2",
-    "chai": "^4.2.0",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "db-migrate": "^0.11.11",
     "db-migrate-pg": "^1.2.2",
     "dotenv": "^8.2.0",
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
+    "faker": "^5.4.0",
     "helmet": "^4.1.1",
     "joi": "^17.2.1",
     "js-sha256": "^0.9.0",
     "jsonwebtoken": "^8.5.1",
-    "mocha": "^8.2.0",
     "morgan": "^1.10.0",
+    "nyc": "^15.1.0",
     "pg-promise": "^10.7.0",
     "redis": "^3.0.2",
     "root-path": "^0.2.1",
@@ -54,9 +58,12 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
     "eslint": "^7.11.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.1",
+    "mocha": "^8.2.0",
     "nodemon": "^2.0.4"
   }
 }

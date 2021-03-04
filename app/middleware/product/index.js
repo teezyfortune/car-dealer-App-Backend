@@ -5,9 +5,10 @@ import ApiError from '../../utils/error/api.error';
 const { checkFileSize, checkFileType } = Helper;
 const { constants: { RESOURCE_ALREADY_EXIST, RESOURCE_VERIFICATION_FAIL,
   RESOURCE_VERIFICATION_FAIL_MSG, ERROR_UPLOADING_FILE, ERROR_UPLOADING_FILE_MSG,
-  RESOURCE_EXIST_VERIFICATION_FAIL, RESOURCE_EXIST_VERIFICATION_FAIL_MSG },
+  RESOURCE_EXIST_VERIFICATION_FAIL, RESOURCE_EXIST_VERIFICATION_FAIL_MSG,
+  RESOURCE_NOT_FOUND, },
 imageFileType: { ALLOWED_FILE_TYPE } } = constants;
-const { findProductByName, upload } = ProductServices;
+const { findProductByName, upload, fetchProduct } = ProductServices;
 
 /**
  * Contains Methods that validates products
@@ -32,6 +33,32 @@ class ProductMiddleWare {
       return product ? Helper.errorResponse(req, res, new ApiError({ status:
         400,
       message: RESOURCE_ALREADY_EXIST('Product') })) : next();
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('bodydy', e);
+      e.status = RESOURCE_EXIST_VERIFICATION_FAIL('PRODUCT');
+      Helper.moduleErrLogMessager(e);
+      Helper.errorResponse(req, res,
+        new ApiError({ message: RESOURCE_VERIFICATION_FAIL_MSG('Product') }));
+    }
+  }
+
+  /**
+   * Check if a product exist
+   * @static
+   * @param { Object } req - The request from the endpoint.
+   * @param { Object } res - The response returned by the method.
+   * @param { function } next - Calls the next handle.
+   * @returns { JSON | Null } - Returns error response if validation fails or Null if otherwise.
+   * @memberof AuthMiddleware
+   *
+   */
+  static async checkIfProductExistById(req, res, next) {
+    try {
+      const product = await fetchProduct(req.params.productId);
+      return product ? next() : Helper.errorResponse(req, res, new ApiError({ status:
+        404,
+      message: RESOURCE_NOT_FOUND('Product') }));
     } catch (e) {
       e.status = RESOURCE_EXIST_VERIFICATION_FAIL('PRODUCT');
       Helper.moduleErrLogMessager(e);
