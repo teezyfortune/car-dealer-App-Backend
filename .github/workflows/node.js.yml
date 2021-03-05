@@ -38,11 +38,10 @@ jobs:
     - run: npm install
     - run: npm install nyc -g
       env:
-        TEST_DATABASE_URL: ${{secret.TEST_DATABASE_URL}}
-        CAR_DEALER_JWT_SECRET: ${{secret.TEST_DATABASE_URL}}
+        TEST_DATABASE_URL: ${{secrets.TEST_DATABASE_URL}}
+        CAR_DEALER_JWT_SECRET: ${{secrets.CAR_DEALER_JWT_SECRET}}
         CAR_DEALER_NODE_ENV: 'test'
-        TSR_AWS_ACCESS_KEY: ${{secret.TSR_AWS_ACCESS_KEY}}
-        TSR_AWS_SECRET_KEY: ${{secret.TSR_AWS_SECRET_KEY}}
-        TSR_AWS_BUCKET:    ${{secret.TSR_AWS_BUCKET}}
-    - run: npm run test
-        debug: true
+        TSR_AWS_ACCESS_KEY: ${{secrets.TSR_AWS_ACCESS_KEY}}
+        TSR_AWS_SECRET_KEY: ${{secrets.TSR_AWS_SECRET_KEY}}
+        TSR_AWS_BUCKET:    ${{secrets.TSR_AWS_BUCKET}}
+    - run: npm test
