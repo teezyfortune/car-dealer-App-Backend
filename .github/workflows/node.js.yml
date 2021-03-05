@@ -12,7 +12,7 @@ on:
 jobs:
   coverage:
     name: coverage
-    runs-on: ubuntu-latest
+runs-on: macos-latest
     services:
       postgres:
         image: postgres
@@ -38,10 +38,11 @@ jobs:
     - run: npm install
     - run: npm install nyc -g
       env:
-        CC_TEST_REPORTER_ID: '21cd1204d403962ea55408784f329eb5d7c03b2993964f0ce8aaeb99d5711031'
-        TEST_DATABASE_URL: 'postgres://fortune:123456@localhost:5432/car_dealer_db_test'
-        CAR_DEALER_JWT_SECRET: '@hdhd%w&91jqQ32nps'
+        TEST_DATABASE_URL: ${{secret.TEST_DATABASE_URL}}
+        CAR_DEALER_JWT_SECRET: ${{secret.TEST_DATABASE_URL}}
         CAR_DEALER_NODE_ENV: 'test'
-      with:
-        coverageCommand: npm run test
+        TSR_AWS_ACCESS_KEY: ${{secret.TSR_AWS_ACCESS_KEY}}
+        TSR_AWS_SECRET_KEY: ${{secret.TSR_AWS_SECRET_KEY}}
+        TSR_AWS_BUCKET:    ${{secret.TSR_AWS_BUCKET}}
+    - run: npm run test
         debug: true
