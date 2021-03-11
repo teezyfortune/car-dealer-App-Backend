@@ -7,8 +7,8 @@
     "test": "nyc --reporter=lcov --reporter=text cross-env CAR_DEALER_NODE_ENV=test mocha -c -r esm **/test/**/*.test.js --timeout 12000 --exit",
     "pretest": "cross-env  CAR_DEALER_NODE_ENV=test npm run migrate:reset && cross-env CAR_DEALER_NODE_ENV=test npm run migrate up && cross-env CAR_DEALER_NODE_ENV=test npm run seed:reset && cross-env CAR_DEALER_NODE_ENV=test npm run seed:up && npm run lint",
     "prestart": "cross-env CAR_DEALER_NODE_ENV=production npm run migrate:up && cross-env CAR_DEALER_NODE_ENV=production npm run seed:up",
-    "start":"cross-env CAR_DEALER_NODE_ENV=production node -r esm .",
-    "dev": "nodemon -r esm . ",
+    "start": "cross-env CAR_DEALER_NODE_ENV=production node -r esm .",
+    "dev": "nodemon -r esm .",
     "migrate": "db-migrate --migrations-dir ./app/db/migrations",
     "migrate:up": "npm run migrate up",
     "migrate:down": "npm run migrate down",
@@ -41,6 +41,7 @@
     "db-migrate-pg": "^1.2.2",
     "dotenv": "^8.2.0",
     "esm": "^3.2.25",
+    "esm-cli": "^1.1.1",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
     "faker": "^5.4.0",
@@ -64,6 +65,8 @@
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.1",
     "mocha": "^8.2.0",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "rimraf": "^2.7.1",
+    "shx": "^0.3.3"
   }
 }

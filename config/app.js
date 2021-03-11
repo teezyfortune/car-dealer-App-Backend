@@ -43,12 +43,11 @@ const appConfig = (app) => {
   // adds middleware that parses requests with x-www-form-urlencoded data encoding
   app.use(urlencoded({ extended: true }));
 
-  // adds a heartbeat route for the culture
-  app.get('/', (req, res) => successResponse(res, { message: WELCOME }));
-
   // serves api route
   app.use('/api/v1', routes);
 
+  // adds a heartbeat route for the culture
+  app.get('/', (req, res) => successResponse(res, { message: WELCOME }));
   // catches 404 errors and forwards them to error handlers
   app.use((req, res, next) => {
     next(notFoundApi);
