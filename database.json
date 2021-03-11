@@ -3,7 +3,8 @@
      "ENV": "DEVELOPMENT_DATABASE_URL"
   },
  "production":{
-     "ENV": "DATABASE_URL"
+     "ENV": "DATABASE_URL",
+     "ssl": true
  },
    "test":{
      "ENV": "TEST_DATABASE_URL"
