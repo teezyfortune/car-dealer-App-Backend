@@ -10,8 +10,8 @@ const {
   TSR_AWS_ACCESS_KEY: AWS_ACCESS_KEY,
   TSR_AWS_SECRET_KEY: AWS_SECRET_KEY,
   TSR_AWS_BUCKET: AWS_BUCKET_NAME,
-
 } = process.env;
+
 const presentEnv = {
   development,
   production,

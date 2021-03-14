@@ -1,10 +1,9 @@
 import 'dotenv/config';
 
 export default {
-  username: process.env.PRODUCTION_USERNAME,
-  password: process.env.PRODUCTION_PASSWORD,
-  database: process.env.PRODUCTION_DATABASE,
-  host: process.env.PRODUCTION_HOST,
-  port: process.env.PRODUCTION_PORT,
-  ssl: true
+  DATABASE_HOST: process.env.DATABASE_HOST,
+  DATABASE_PORT: process.env.DATABASE_PORT,
+  DATABASE_USERNAME: process.env.DATABASE_USERNAME,
+  DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
+  DATABASE_NAME: process.env.DATABASE_NAME
 };

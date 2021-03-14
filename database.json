@@ -1,10 +1,19 @@
 {
   "development":{
-     "ENV": "DEVELOPMENT_DATABASE_URL"
-  },
+    "ENV": "DEVELOPMENT_DATABASE_URL"
+    },
+  
  "production":{
-     "ENV": "DATABASE_URL",
-     "ssl": true
+  "driver":"pg",
+  "user":{"ENV":"DATABASE_USERNAME"}, 
+  "password": {"ENV":"DATABASE_PASSWORD", 
+    "host": {"ENV":"DATABASE_HOST"}, 
+    "database":{"ENV": "DATABASE_NAME"},
+    "port": {"ENV":"DATABASE_PORT"}
+   },
+   "ssl":{
+    "rejectUnauthorized": false
+  }
  },
    "test":{
      "ENV": "TEST_DATABASE_URL"
