@@ -5,11 +5,14 @@ import config from '../../../config/env';
 // promisify redis to enable the use of ES6 promises features.
 promisifyAll(redis);
 
-const { NODE_ENV, REDIS_URL } = config;
+const { NODE_ENV } = config;
 
 // Creates an instance of a Redis client.
-const redisDB = REDIS_URL ? redis.createClient(REDIS_URL) : redis.createClient();
-
+const redisDB = redis.createClient({
+  port: config.REDIS_PORT,
+  host: config.REDIS_HOST
+});
+redisDB.AUTH(config.REDIS_PASSWORD);
 // Selects a different database while in the testing environment
 if (NODE_ENV === 'test') {
   redisDB.select(3, async (err) => {
