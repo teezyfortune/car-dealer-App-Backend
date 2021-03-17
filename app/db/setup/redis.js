@@ -12,10 +12,11 @@ const redisDB = redis.createClient({
   port: config.REDIS_PORT,
   host: config.REDIS_HOST
 });
+
 redisDB.AUTH(config.REDIS_PASSWORD);
 // Selects a different database while in the testing environment
 if (NODE_ENV === 'test') {
-  redisDB.select(3, async (err) => {
+  redisDB.select(0, async (err) => {
     if (err) {
       logger.error(`An Error occurred while spawning a 
     new Redis database with the following message: ${err.message}`);
