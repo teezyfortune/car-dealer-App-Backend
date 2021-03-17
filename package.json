@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "This Application allows car dealers to upload their car products for buyers to see and pick their choice of car",
   "main": "app.js",
-  "engines": {
-    "node": "15.11.0"
-  },
   "scripts": {
     "test": "nyc --reporter=lcov --reporter=text cross-env CAR_DEALER_NODE_ENV=test mocha -c -r esm **/test/**/*.test.js --timeout 12000 --exit",
     "pretest": "cross-env  CAR_DEALER_NODE_ENV=test npm run migrate:reset && cross-env CAR_DEALER_NODE_ENV=test npm run migrate up && cross-env CAR_DEALER_NODE_ENV=test npm run seed:reset && cross-env CAR_DEALER_NODE_ENV=test npm run seed:up && npm run lint",
