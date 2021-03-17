@@ -4,7 +4,7 @@
   "description": "This Application allows car dealers to upload their car products for buyers to see and pick their choice of car",
   "main": "app.js",
   "engines": {
-    "node": "15.4.0"
+    "node": "10.16.0"
   },
   "scripts": {
     "test": "nyc --reporter=lcov --reporter=text cross-env CAR_DEALER_NODE_ENV=test mocha -c -r esm **/test/**/*.test.js --timeout 12000 --exit",
