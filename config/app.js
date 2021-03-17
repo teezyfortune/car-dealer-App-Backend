@@ -59,6 +59,7 @@ const appConfig = (app) => {
 
   // initialize the port constant
   const port = config.PORT || 8800;
+  logger.info(`CONFIG ${port}`);
 
   // server listens for connections
   app.listen(port, () => {
