@@ -3,9 +3,9 @@ import chai, { expect } from 'chai';
 import faker from 'faker';
 import chaiHttp from 'chai-http';
 import app from '../../../index';
-import fixtures from '../fixtures/product';
 import * as adminFixtures from '../fixtures/admin';
 
+const path = 'app/test/integration/elipse.png';
 chai.use(chaiHttp);
 let adminToken;
 let productId;
@@ -28,7 +28,7 @@ describe('Product API', () => {
       .field('type', 'car')
       .field('manufacturedDate', '2021-03-03')
       .field('description', 'kkfkffkwkckkdkkcdkkkcfkfvkfvfvfkfvjfvbfvjfvjvf')
-      .attach('file', `${fixtures}`)
+      .attach('file', path)
       .end((err, res) => {
         productId = res.body.data.id;
         expect(res.status).to.equal(200);
@@ -60,7 +60,7 @@ describe('Product API', () => {
       .set({ Authorization: adminToken })
       .field('manufactured_date', '2020-03-01')
       .field('vehicle_type', 'lorry')
-      .attach('file', `${fixtures}`)
+      .attach('file', path)
       .end((err, res) => {
         expect(res.status).to.equal(200);
         done(err);
